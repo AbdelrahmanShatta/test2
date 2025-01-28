@@ -106,69 +106,68 @@ int  BigReal:: size()  // gets the size of the given number
         return integer.size() + decimal.size();
     }
 //_______________________________________________________________________________________________________________________________________
-BigReal& BigReal::add(BigReal& n2) //adds the two given numbers witha fucntion then use it in the operator
-
- {
+BigReal& BigReal::add(BigReal& n2) //adds the two given numbers with a function then use it in the operator
+{
+    BigReal result;
     string intresult = "";
-        string floatresult = "";
-        string int2 = n2.integer;
-        string dec2 = n2.decimal;
-        int difference;
-        int sum;
-        int carry = -1;
-        int y;
-        //__________________________________________________________________________________        
-        // FLOAT  for decimal part 
-        difference = 0;
-        sum = 0;
-        carry = 0;
-        y = max(dec2.size(), decimal.size());
-        if (y == dec2.size()) {
-            difference = dec2.size() - decimal.size();
-            string zeros(difference, '0');
-            decimal = decimal ;
-        }
-        if (y == decimal.size()) {
-            difference = decimal.size() - dec2.size();
-            string zeros(difference, '0');
-            dec2 = dec2 ;
-        }
-        for (int i = y - 1; i >= 0; i--) {
-            sum = ((dec2[i] - '0') + (decimal[i] - '0') + carry) % 10;
-            carry = ((dec2[i] - '0') + (decimal[i] - '0') + carry) / 10;
-            char digit = sum + '0';
-            floatresult = digit + floatresult;
-        }
-        //__________________________________________________________________________________
-        // INT for integer part
-        difference = 0;
-        sum = 0;
-        y = max(int2.size(), integer.size());
-        if (y == int2.size()) {
-            difference = int2.size() - integer.size();
-            string zeros(difference, '0');
-            integer = zeros + integer;
-        }
-        if (y == integer.size()) {
-            difference = integer.size() - int2.size();
-            string zeros(difference, '0');
-            int2 = zeros + int2;
-        }
-        for (int i = y - 1; i >= 0; i--) {
-            sum = ((int2[i] - '0') + (integer[i] - '0') + carry) % 10;
-            carry = ((int2[i] - '0') + (integer[i] - '0') + carry) / 10;
-            char digit = sum + '0';
-            intresult = digit + intresult;
-        }
+    string floatresult = "";
+    string int2 = n2.integer;
+    string dec2 = n2.decimal;
+    string dec1 = decimal;
+    string int1 = integer;
+    int difference;
+    int sum;
+    int carry = 0;
+    int y;
+    //__________________________________________________________________________________        
+    // FLOAT for decimal part 
+    y = max(dec2.size(), dec1.size());
+    if (y == dec2.size()) {
+        difference = dec2.size() - dec1.size();
+        string zeros(difference, '0');
+        dec1 = dec1 + zeros;
+    }
+    if (y == dec1.size()) {
+        difference = dec1.size() - dec2.size();
+        string zeros(difference, '0');
+        dec2 = dec2 + zeros;
+    }
+    for (int i = y - 1; i >= 0; i--) {
+        sum = ((dec2[i] - '0') + (dec1[i] - '0') + carry) % 10;
+        carry = ((dec2[i] - '0') + (dec1[i] - '0') + carry) / 10;
+        char digit = sum + '0';
+        floatresult = digit + floatresult;
+    }
+    //__________________________________________________________________________________
+    // INT for integer part
+    y = max(int2.size(), int1.size());
+    if (y == int2.size()) {
+        difference = int2.size() - int1.size();
+        string zeros(difference, '0');
+        int1 = zeros + int1;
+    }
+    if (y == int1.size()) {
+        difference = int1.size() - int2.size();
+        string zeros(difference, '0');
+        int2 = zeros + int2;
+    }
+    for (int i = y - 1; i >= 0; i--) {
+        sum = ((int2[i] - '0') + (int1[i] - '0') + carry) % 10;
+        carry = ((int2[i] - '0') + (int1[i] - '0') + carry) / 10;
+        char digit = sum + '0';
+        intresult = digit + intresult;
+    }
 
-        if (carry == 1) {
-            intresult = '1' + intresult;
-        }
-        //__________________________________________________________________________________
-        n2.integer = intresult;
-        n2.decimal = floatresult;
-        return n2; 
- }
+    if (carry == 1) {
+        intresult = '1' + intresult;
+    }
+    //__________________________________________________________________________________
+    result.integer = intresult;
+    result.decimal = floatresult;
+    result.sign = sign;  // Preserve the sign from the original number
+    n2 = result;  // Copy the result to n2 to maintain compatibility with existing code
+    return n2;
+}
 //_______________________________________________________________________________________________________________________________________
 BigReal& BigReal :: minus(BigReal& n2) //minuses the two given numbers witha fucntion then use it in the operator
 {
