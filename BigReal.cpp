@@ -47,7 +47,7 @@ using namespace std;
         decimal = "0";
     }
 //_______________________________________________________________________________________________________________________________________
- BigReal::BigReal(string realNumber) { 
+ BigReal::BigReal(string realNumber){ 
         if (isValidReal(realNumber)) { // constructor
             if (realNumber[0] == '-') {
                 sign = -1;
