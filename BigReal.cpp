@@ -1,586 +1,384 @@
-#include <bits/stdc++.h>
-#include <cmath>
-#include <iostream>
-using namespace std;
+#include <algorithm>
 #include "BigReal.h"
 
-
- void BigReal:: split(string realNumber) {
-        if (realNumber.find('.') == string::npos) {
-            integer = realNumber;
-            decimal = "0";
-        } else {
-            integer = realNumber.substr(0, realNumber.find('.'));
-            decimal = realNumber.substr(realNumber.find('.') + 1, realNumber.size());
-        }
+void BigReal::split(std::string realNumber) {
+    if (realNumber.find('.') == std::string::npos) {
+        integer = realNumber;
+        decimal = "0";
+    } else {
+        integer = realNumber.substr(0, realNumber.find('.'));
+        decimal = realNumber.substr(realNumber.find('.') + 1);
     }
-//_______________________________________________________________________________________________________________________________________
- bool   BigReal:: isValidReal(string realNumber)  // True if correct real
-    {
-        auto it = realNumber.begin();
-        if (*it == '+' or *it == '-') {
-            it++;
-        }
-        bool dot = false;
-        while (it != realNumber.end()) {
-            if (isdigit(*it) or *it == '.') {
-                if (*it == '.') {
-                    if (dot == true) {
-                        return false;
-                    } else {
-                        dot = true;
-                    }
+}
+
+bool BigReal::isValidReal(std::string realNumber) {
+    auto it = realNumber.begin();
+    if (*it == '+' || *it == '-') {
+        it++;
+    }
+    bool dot = false;
+    while (it != realNumber.end()) {
+        if (std::isdigit(*it) || *it == '.') {
+            if (*it == '.') {
+                if (dot) {
+                    return false;
                 }
-                it++;
-
+                dot = true;
             }
+            it++;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
 
-            else {
-                return false;
+BigReal::BigReal() {
+    integer = "0";
+    decimal = "0";
+    sign = 1;
+}
+
+BigReal::BigReal(std::string realNumber) {
+    if (isValidReal(realNumber)) {
+        if (realNumber[0] == '-') {
+            sign = -1;
+            realNumber.erase(0, 1);
+        } else {
+            sign = 1;
+            if (realNumber[0] == '+') {
+                realNumber.erase(0, 1);
+            } else if (realNumber[0] == '.') {
+                realNumber = '0' + realNumber;
             }
         }
-        return true;
-    }
-//_______________________________________________________________________________________________________________________________________
-  BigReal::  BigReal() {  // Default constructor
+        split(realNumber);
+    } else {
         integer = "0";
         decimal = "0";
+        sign = 1;
     }
-//_______________________________________________________________________________________________________________________________________
- BigReal::BigReal(string realNumber) { 
-        if (isValidReal(realNumber)) { // constructor
-            if (realNumber[0] == '-') {
-                sign = -1;
-                realNumber.erase(0, 1);
-            } else {
-                sign = 1;
-                if (realNumber[0] == '+') {
-                    realNumber.erase(0, 1);
-                } else if (realNumber[0] == '.') {
-                    realNumber = '0' + realNumber;
-                }
-            }
-            split(realNumber);
+}
 
-        } else {
-            integer = "0";
-            decimal = "0";
-        }
-    }
-//_______________________________________________________________________________________________________________________________________
-BigReal ::BigReal(const BigReal& other) {  // copy constructor 
+BigReal::BigReal(const BigReal& other) {
+    integer = other.integer;
+    decimal = other.decimal;
+    sign = other.sign;
+}
+
+BigReal& BigReal::operator=(const BigReal& other) {
+    if (this != &other) {
         integer = other.integer;
         decimal = other.decimal;
         sign = other.sign;
     }
-//_______________________________________________________________________________________________________________________________________
-void BigReal :: operator=(BigReal& other) { //overloading assigment operator 
-        integer = other.integer;
-        decimal = other.decimal;
-        sign = other.sign;
-    }
-//_______________________________________________________________________________________________________________________________________
-void BigReal :: setNum(string realNumber) { //sets the number given to the Bigreal
-        if (isValidReal(realNumber)) {
-            if (realNumber[0] == '-') {
-                sign = -1;
-                realNumber.erase(0, 1);
-            } else {
-                sign = 1;
-                if (realNumber[0] == '+') {
-                    realNumber.erase(0, 1);
-                } else if (realNumber[0] == '.') {
-                    realNumber = '0' + realNumber;
-                }
-            }
-            split(realNumber);
+    return *this;
+}
 
+void BigReal::setNum(std::string realNumber) {
+    if (isValidReal(realNumber)) {
+        if (realNumber[0] == '-') {
+            sign = -1;
+            realNumber.erase(0, 1);
         } else {
-            integer = "0";
-            decimal = "0";
+            sign = 1;
+            if (realNumber[0] == '+') {
+                realNumber.erase(0, 1);
+            } else if (realNumber[0] == '.') {
+                realNumber = '0' + realNumber;
+            }
         }
+        split(realNumber);
+    } else {
+        integer = "0";
+        decimal = "0";
+        sign = 1;
     }
-//_______________________________________________________________________________________________________________________________________
-int  BigReal:: size()  // gets the size of the given number
-    {
-        return integer.size() + decimal.size();
+}
+
+int BigReal::size() {
+    return integer.size() + decimal.size();
+}
+
+BigReal& BigReal::add(BigReal& n2) {
+    std::string intresult;
+    std::string floatresult;
+    std::string int2 = n2.integer;
+    std::string dec2 = n2.decimal;
+    int difference;
+    int sum;
+    int carry = 0;
+    int y;
+
+    // Handle decimal part
+    y = std::max(dec2.size(), decimal.size());
+    if (y == dec2.size()) {
+        difference = dec2.size() - decimal.size();
+        std::string zeros(difference, '0');
+        decimal = decimal + zeros;
     }
-//_______________________________________________________________________________________________________________________________________
-BigReal& BigReal::add(BigReal& n2) //adds the two given numbers witha fucntion then use it in the operator
+    if (y == decimal.size()) {
+        difference = decimal.size() - dec2.size();
+        std::string zeros(difference, '0');
+        dec2 = dec2 + zeros;
+    }
 
- {
-    string intresult = "";
-        string floatresult = "";
-        string int2 = n2.integer;
-        string dec2 = n2.decimal;
-        int difference;
-        int sum;
-        int carry = -1;
-        int y;
-        //__________________________________________________________________________________        
-        // FLOAT  for decimal part 
-        difference = 0;
-        sum = 0;
-        carry = 0;
-        y = max(dec2.size(), decimal.size());
-        if (y == dec2.size()) {
-            difference = dec2.size() - decimal.size();
-            string zeros(difference, '0');
-            decimal = decimal ;
-        }
-        if (y == decimal.size()) {
-            difference = decimal.size() - dec2.size();
-            string zeros(difference, '0');
-            dec2 = dec2 ;
-        }
-        for (int i = y - 1; i >= 0; i--) {
-            sum = ((dec2[i] - '0') + (decimal[i] - '0') + carry) % 10;
-            carry = ((dec2[i] - '0') + (decimal[i] - '0') + carry) / 10;
-            char digit = sum + '0';
-            floatresult = digit + floatresult;
-        }
-        //__________________________________________________________________________________
-        // INT for integer part
-        difference = 0;
-        sum = 0;
-        y = max(int2.size(), integer.size());
-        if (y == int2.size()) {
-            difference = int2.size() - integer.size();
-            string zeros(difference, '0');
-            integer = zeros + integer;
-        }
-        if (y == integer.size()) {
-            difference = integer.size() - int2.size();
-            string zeros(difference, '0');
-            int2 = zeros + int2;
-        }
-        for (int i = y - 1; i >= 0; i--) {
-            sum = ((int2[i] - '0') + (integer[i] - '0') + carry) % 10;
-            carry = ((int2[i] - '0') + (integer[i] - '0') + carry) / 10;
-            char digit = sum + '0';
-            intresult = digit + intresult;
-        }
+    for (int i = y - 1; i >= 0; i--) {
+        sum = ((dec2[i] - '0') + (decimal[i] - '0') + carry) % 10;
+        carry = ((dec2[i] - '0') + (decimal[i] - '0') + carry) / 10;
+        floatresult = char(sum + '0') + floatresult;
+    }
 
-        if (carry == 1) {
-            intresult = '1' + intresult;
+    // Handle integer part
+    y = std::max(int2.size(), integer.size());
+    if (y == int2.size()) {
+        difference = int2.size() - integer.size();
+        std::string zeros(difference, '0');
+        integer = zeros + integer;
+    }
+    if (y == integer.size()) {
+        difference = integer.size() - int2.size();
+        std::string zeros(difference, '0');
+        int2 = zeros + int2;
+    }
+
+    for (int i = y - 1; i >= 0; i--) {
+        sum = ((int2[i] - '0') + (integer[i] - '0') + carry) % 10;
+        carry = ((int2[i] - '0') + (integer[i] - '0') + carry) / 10;
+        intresult = char(sum + '0') + intresult;
+    }
+
+    if (carry == 1) {
+        intresult = '1' + intresult;
+    }
+
+    n2.integer = intresult;
+    n2.decimal = floatresult;
+    return n2;
+}
+
+BigReal& BigReal::minus(BigReal& n2) {
+    std::string intresult;
+    std::string floatresult;
+    std::string int2 = n2.integer;
+    std::string dec2 = n2.decimal;
+    int difference;
+    int diff;
+    int borrow = 0;
+    int y;
+
+    // Handle decimal part
+    y = std::max(dec2.size(), decimal.size());
+    if (y == dec2.size()) {
+        difference = dec2.size() - decimal.size();
+        std::string zeros(difference, '0');
+        decimal = decimal + zeros;
+    }
+    if (y == decimal.size()) {
+        difference = decimal.size() - dec2.size();
+        std::string zeros(difference, '0');
+        dec2 = dec2 + zeros;
+    }
+
+    if (*this > n2) {
+        for (int i = y - 1; i >= 0; i--) {
+            diff = (decimal[i] - '0') - (dec2[i] - '0') + borrow;
+            if (diff < 0) {
+                diff += 10;
+                borrow = -1;
+            } else {
+                borrow = 0;
+            }
+            floatresult = char(diff + '0') + floatresult;
         }
-        //__________________________________________________________________________________
-        n2.integer = intresult;
         n2.decimal = floatresult;
-        return n2; 
- }
-//_______________________________________________________________________________________________________________________________________
-BigReal& BigReal :: minus(BigReal& n2) //minuses the two given numbers witha fucntion then use it in the operator
-{
-     string intresult = "";
-        string floatresult = "";
-        string int2 = n2.integer;
-        string dec2 = n2.decimal;
-        string temp_int;
-        bool nve=false;
-        int difference;
-        int diff;
-        int borrow = 0;
-        int y;
-        //__________________________________________________________________________________
-        // FLOAT for decimal part
-        difference = 0;
-        diff = 0;
-        
-        y = max(dec2.size(), decimal.size());
-        if (y == dec2.size()) 
-        {
-            difference = dec2.size() - decimal.size();
-            string zeros(difference, '0');
-            decimal = decimal+zeros ;
-        }
-        if (y == decimal.size())
-        {
-            difference = decimal.size() - dec2.size();
-            string zeros(difference, '0');
-            dec2 =   dec2 + zeros;
-        }
-        if(*this>n2)  //bigger>smaller
-        {
-        for (int i = y - 1; i >= 0; i--) 
-        {
-           
-            
-            diff = ((decimal[i] - '0') - (dec2[i] - '0')+borrow) ;
-            if(diff<0)
-            {
-                diff=((decimal[i] - '0') - (dec2[i] - '0')+borrow+10);
-                borrow=-1;
-                
+    } else {
+        for (int i = y - 1; i >= 0; i--) {
+            diff = (dec2[i] - '0') - (decimal[i] - '0') + borrow;
+            if (diff < 0) {
+                diff += 10;
+                borrow = -1;
+            } else {
+                borrow = 0;
             }
-            else
-            {
-                borrow=0;
-            }
-        char digit = diff+ '0';
-        
-        floatresult =   digit + floatresult;
-    
+            floatresult = char(diff + '0') + floatresult;
         }
-        n2.decimal=floatresult;
-        }
-        //___________________________________
-        else
-        {
-            for (int i = y - 1; i >= 0; i--) 
-        {
-           
-            
-            diff = ((dec2[i] - '0') - (decimal[i] - '0')+borrow) ;
-            if(diff<0)
-            {
-                diff=((dec2[i] - '0') - (decimal[i] - '0')+borrow+10);
-                borrow=-1;
-                
-            }
-            else
-            {
-                borrow=0;
-            }
-        char digit = diff+ '0';
-        
-        floatresult =   digit + floatresult;
-    
-        }
-        n2.decimal=floatresult;
-        }
-        //__________________________________________________________________________________
-        // INT for integer part
-        difference = 0;
-        diff = 0;
-        
-        y = max(int2.size(), integer.size());
-        if (y == int2.size()) 
-        {
-            difference = int2.size() - integer.size();
-            string zeros(difference, '0');
-            integer = zeros + integer;
-        }
-        if (y == integer.size())
-        {
-            difference = integer.size() - int2.size();
-            string zeros(difference, '0');
-            int2 = zeros + int2;
-        }
-        if(*this>n2)  //bigger>smaller
-        {
-            
-        for (int i = y - 1; i >= 0; i--) 
-        {
-            
-            
-            diff = ((integer[i] - '0') - (int2[i] - '0')+borrow) ;
-            if(diff<0)
-            {
-                diff=((integer[i] - '0') - (int2[i] - '0')+borrow+10);
-                borrow=-1;
-                
-            }
-            else
-            {
-                borrow=0;
-            }
-            
-            
-        
-        char digit = diff+ '0';
-        
-        intresult = digit + intresult;
-      
-        }
-        n2.integer=intresult;
-        }
-        //___________________________________
-        else
-        {
-             for (int i = y - 1; i >= 0; i--) 
-        {
-           
-            
-            diff = ((int2[i] - '0') - (integer[i] - '0')+borrow) ;
-            if(diff<0)
-            {
-                diff=((int2[i] - '0') - (integer[i] - '0')+borrow+10);
-                borrow=-1;
-                
-            }
-            else
-            {
-                borrow=0;
-            }
-            
-            
-        
-        char digit = diff+ '0';
-        
-        intresult = digit + intresult;
-        
-        }
-        n2.sign=-1;
-        n2.integer=intresult;
-        }
-        return n2;
-}
-//_______________________________________________________________________________________________________________________________________
-BigReal& BigReal:: operator+(BigReal& n2) { //overloading the + operator 
-        
-    if(this->sign==-1 and n2.sign==1) //takes into consideration the different cases of -ve and +ve
-       {
-        sign=sign*-1;
-       return n2.minus(*this);     //if -a + b   == b-a 
-       
-       }
-    else if(this->sign==1 and n2.sign==-1)
-    {
-        n2.sign=n2.sign*-1;
-        return this->minus(n2);    //if a + -b   == a-b 
+        n2.decimal = floatresult;
     }
-    else if(this->sign==-1 and n2.sign==-1)
-    {
-        
-        return this->add(n2);     //if -a + -b == -(a+b) 
 
-        
+    // Handle integer part
+    y = std::max(int2.size(), integer.size());
+    if (y == int2.size()) {
+        difference = int2.size() - integer.size();
+        std::string zeros(difference, '0');
+        integer = zeros + integer;
     }
-    else
-    {
-        return this->add(n2);     //if a + b   ==   a+b
+    if (y == integer.size()) {
+        difference = integer.size() - int2.size();
+        std::string zeros(difference, '0');
+        int2 = zeros + int2;
     }
-     
-    }
-//_______________________________________________________________________________________________________________________________________
-BigReal& BigReal :: operator-(BigReal& n2) { //overloading the - operator 
 
-    if(this->sign==-1 and n2.sign==1)//takes into consideration the different cases of -ve and +ve
-    {
-        n2.sign=n2.sign*-1;
-        return this->add(n2); //if -a - b == -(a+b) 
-    } 
-    else if(this->sign==1 and n2.sign==-1)
-    {   
-        n2.sign=n2.sign*-1;
-        return this->add(n2);  //if a - -b   ==   a+b
-    }
-    else if(this->sign==-1 and n2.sign==-1)
-    {
-        for(int i=0;i<this->integer.size();i++) //if the two numbers are zeros then sign is positive
-        {
-        if(this->integer[i]=='0'&& n2.integer[i]=='0')
-        {
-            sign=1;
-        }
-        }   
-        return n2.minus(*this);  //if -a  -  -b   == b-a 
-    }
-    else{
-         return this->minus(n2); //if a-b == a-b
-    }
-        
-    }
-//_______________________________________________________________________________________________________________________________________
-bool BigReal :: operator>  (BigReal& anotherReal) //compares the two different objects/overloading the  > operator
-{   
-        string n2 = anotherReal.integer;
-        string d2 = anotherReal.decimal;
-        string n1 = this->integer;
-        string d1 = this->decimal;
-        int y = max(n1.size(), n2.size());
-        if (y == n2.size()) 
-        {
-            int difference = n2.size() - n1.size();
-            string zeros(difference, '0');
-            n1 = zeros + n1 ;
-        }
-        if (y == n1.size())
-        {
-            int difference = n1.size() - n2.size();
-            string zeros(difference, '0');
-            n2 =   zeros+n2;
-        }
-        y = max(d1.size(), d2.size());
-        if (y == d2.size()) 
-        {
-            int difference = d2.size() - d1.size();
-            string zeros(difference, '0');
-            d1 = d1+zeros ;
-        }
-        if (y == d1.size())
-        {
-            int difference = d1.size() - d2.size();
-            string zeros(difference, '0');
-            d2 = d2 + zeros;
-        }
-        if(anotherReal.sign==-1 && this->sign==1)
-        {
-            return true;
-        }
-        if(anotherReal.sign==1 && this->sign==-1)  //this>anothereal
-        {
-            return false;
-        }
-        if(anotherReal.sign==-1 && this->sign==-1)  
-        {
-            BigReal a(*this);
-            a.sign=1;
-            BigReal b(anotherReal);
-            b.sign=1;
-            return (a<b);
-        }
-        string num1 = n1+d1;//822>823
-        string num2 = n2+d2;
-        for(int i =0; i<num1.size();i++){
-            if(num2[i]<num1[i]){
-                return true;
+    if (*this > n2) {
+        for (int i = y - 1; i >= 0; i--) {
+            diff = (integer[i] - '0') - (int2[i] - '0') + borrow;
+            if (diff < 0) {
+                diff += 10;
+                borrow = -1;
+            } else {
+                borrow = 0;
             }
-            else if(num2[i]>num1[i])
-            {
-                return false;
-            }
-            else if(num2[i]==num1[i])
-            {
-                continue;
-            }
+            intresult = char(diff + '0') + intresult;
         }
-        return false;
-        
+        n2.integer = intresult;
+    } else {
+        for (int i = y - 1; i >= 0; i--) {
+            diff = (int2[i] - '0') - (integer[i] - '0') + borrow;
+            if (diff < 0) {
+                diff += 10;
+                borrow = -1;
+            } else {
+                borrow = 0;
+            }
+            intresult = char(diff + '0') + intresult;
+        }
+        n2.sign = -1;
+        n2.integer = intresult;
+    }
+    return n2;
+}
 
+BigReal& BigReal::operator+(BigReal& n2) {
+    if (sign == -1 && n2.sign == 1) {
+        sign *= -1;
+        return n2.minus(*this);
+    } else if (sign == 1 && n2.sign == -1) {
+        n2.sign *= -1;
+        return this->minus(n2);
+    } else if (sign == -1 && n2.sign == -1) {
+        return this->add(n2);
+    } else {
+        return this->add(n2);
+    }
 }
-//_______________________________________________________________________________________________________________________________________
-bool BigReal :: operator<  (BigReal& anotherReal){ //compares the two different objects/overloading the  < operator
-        string n2 = anotherReal.integer;
-        string d2 = anotherReal.decimal;
-        string n1 = this->integer;
-        string d1 = this->decimal;
-        int y = max(n1.size(), n2.size());
-        if (y == n2.size()) 
-        {
-            int difference = n2.size() - n1.size();
-            string zeros(difference, '0');
-            n1 = zeros + n1 ;
-        }
-        if (y == n1.size())
-        {
-            int difference = n1.size() - n2.size();
-            string zeros(difference, '0');
-            n2 =   zeros+n2;
-        }
-        y = max(d1.size(), d2.size());
-        if (y == d2.size()) 
-        {
-            int difference = d2.size() - d1.size();
-            string zeros(difference, '0');
-            d1 = d1+zeros ;
-        }
-        if (y == d1.size())
-        {
-            int difference = d1.size() - d2.size();
-            string zeros(difference, '0');
-            d2 = d2 + zeros;
-        }
-        if(anotherReal.sign==-1 && this->sign==1)
-        {
-            return false;
-        }
-        if(anotherReal.sign==1 && this->sign==-1)  //this<anothereal
-        {
-            return true;
-        }
-        if(anotherReal.sign==-1 && this->sign==-1)  
-        {
-            BigReal a(*this);
-            a.sign=1;
-            BigReal b(anotherReal);
-            b.sign=1;
-            return (a>b);
-        }
-        string num1 = n1+d1;
-        string num2 = n2+d2;
-        for(int i =0; i<num1.size();i++){
-            if(num2[i]>num1[i]){
-                return true;
-            }
-            else if(num2[i]<num1[i])
-            {
-                return false;
-            }
-            else if(num2[i]==num1[i])
-            {
-                continue;
+
+BigReal& BigReal::operator-(BigReal& n2) {
+    if (sign == -1 && n2.sign == 1) {
+        n2.sign *= -1;
+        return this->add(n2);
+    } else if (sign == 1 && n2.sign == -1) {
+        n2.sign *= -1;
+        return this->add(n2);
+    } else if (sign == -1 && n2.sign == -1) {
+        bool allZeros = true;
+        for (char c : integer) {
+            if (c != '0') {
+                allZeros = false;
+                break;
             }
         }
-        return false;
-        
-        
+        if (allZeros) {
+            for (char c : n2.integer) {
+                if (c != '0') {
+                    allZeros = false;
+                    break;
+                }
+            }
+        }
+        if (allZeros) {
+            sign = 1;
+        }
+        return n2.minus(*this);
+    } else {
+        return this->minus(n2);
+    }
 }
-//_______________________________________________________________________________________________________________________________________
-bool BigReal :: operator== (BigReal& anotherReal)  //compares the two different objects
-{
-        string n2 = anotherReal.integer;
-        string d2 = anotherReal.decimal;
-        string n1 = this->integer;
-        string d1 = this->decimal;
-        int y = max(n1.size(), n2.size());
-        if (y == n2.size()) 
-        {
-            int difference = n2.size() - n1.size();
-            string zeros(difference, '0');
-            n1 = zeros + n1 ;
-        }
-        if (y == n1.size())
-        {
-            int difference = n1.size() - n2.size();
-            string zeros(difference, '0');
-            n2 =   zeros+n2;
-        }
-        y = max(d1.size(), d2.size());
-        if (y == d2.size()) 
-        {
-            int difference = d2.size() - d1.size();
-            string zeros(difference, '0');
-            d1 = d1+zeros ;
-        }
-        if (y == d1.size())
-        {
-            int difference = d1.size() - d2.size();
-            string zeros(difference, '0');
-            d2 = d2 + zeros;
-        }
-        if(this->sign!=anotherReal.sign)
-        {
-            return false;
-        }
-        string num1 = n1+d1;
-        string num2 = n2+d2;
-    for(int i =0; i<num1.size();i++){
-            if(num2[i]>num1[i]){
-                return false;
-            }
-            else if(num2[i]<num1[i])
-            {
-                return false;
-            }
-            else if(num2[i]==num1[i])
-            {
-                continue;
-            }
-        }
+
+bool BigReal::operator>(const BigReal& anotherReal) {
+    if (sign == 1 && anotherReal.sign == -1) {
         return true;
+    }
+    if (sign == -1 && anotherReal.sign == 1) {
+        return false;
+    }
+    if (sign == -1 && anotherReal.sign == -1) {
+        BigReal a(*this);
+        a.sign = 1;
+        BigReal b(anotherReal);
+        b.sign = 1;
+        return (a < b);
+    }
+
+    std::string n1 = integer;
+    std::string d1 = decimal;
+    std::string n2 = anotherReal.integer;
+    std::string d2 = anotherReal.decimal;
+
+    // Pad integers with leading zeros
+    int maxIntLen = std::max(n1.size(), n2.size());
+    n1 = std::string(maxIntLen - n1.size(), '0') + n1;
+    n2 = std::string(maxIntLen - n2.size(), '0') + n2;
+
+    // Pad decimals with trailing zeros
+    int maxDecLen = std::max(d1.size(), d2.size());
+    d1 = d1 + std::string(maxDecLen - d1.size(), '0');
+    d2 = d2 + std::string(maxDecLen - d2.size(), '0');
+
+    std::string num1 = n1 + d1;
+    std::string num2 = n2 + d2;
+
+    return num1 > num2;
 }
-//_______________________________________________________________________________________________________________________________________
- ostream&  operator<<(ostream &os, BigReal &m) //overloads the cout function;
-{ 
-     
-    string num = m.integer + '.' + m.decimal;
-        if (m.sign == -1) {
-            num = '-' + num;
-        }
-        
-    
-    return os << num;
-    
+
+bool BigReal::operator<(const BigReal& anotherReal) {
+    if (sign == 1 && anotherReal.sign == -1) {
+        return false;
+    }
+    if (sign == -1 && anotherReal.sign == 1) {
+        return true;
+    }
+    if (sign == -1 && anotherReal.sign == -1) {
+        BigReal a(*this);
+        a.sign = 1;
+        BigReal b(anotherReal);
+        b.sign = 1;
+        return (a > b);
+    }
+
+    std::string n1 = integer;
+    std::string d1 = decimal;
+    std::string n2 = anotherReal.integer;
+    std::string d2 = anotherReal.decimal;
+
+    // Pad integers with leading zeros
+    int maxIntLen = std::max(n1.size(), n2.size());
+    n1 = std::string(maxIntLen - n1.size(), '0') + n1;
+    n2 = std::string(maxIntLen - n2.size(), '0') + n2;
+
+    // Pad decimals with trailing zeros
+    int maxDecLen = std::max(d1.size(), d2.size());
+    d1 = d1 + std::string(maxDecLen - d1.size(), '0');
+    d2 = d2 + std::string(maxDecLen - d2.size(), '0');
+
+    std::string num1 = n1 + d1;
+    std::string num2 = n2 + d2;
+
+    return num1 < num2;
+}
+
+bool BigReal::operator==(const BigReal& anotherReal) {
+    return integer == anotherReal.integer && 
+           decimal == anotherReal.decimal && 
+           sign == anotherReal.sign;
+}
+
+std::ostream& operator<<(std::ostream& os, const BigReal& m) {
+    if (m.sign == -1) {
+        os << "-";
+    }
+    os << m.integer;
+    if (m.decimal != "0") {
+        os << "." << m.decimal;
+    }
+    return os;
 }

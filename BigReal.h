@@ -1,49 +1,40 @@
 #ifndef BIGREAL_H
 #define BIGREAL_H
 
-using namespace std;
+#include <string>
+#include <iostream>
+
 class BigReal {
+public:
+    class InvalidNumberException : public std::exception {
+        std::string msg;
+    public:
+        InvalidNumberException(const std::string& message) : msg(message) {}
+        const char* what() const noexcept override { return msg.c_str(); }
+    };
+
 protected:  
-string integer;
-string decimal;
-int sign;
-void split(string realNumber);
-//_______________________________________________________________________________________________________________________________________
+    std::string integer;
+    std::string decimal;
+    int sign;
+    void split(const std::string& realNumber);
 
 public:
-bool isValidReal(string realNumber);  // True if correct real
-    
-//_______________________________________________________________________________________________________________________________________
-BigReal();
-//_______________________________________________________________________________________________________________________________________
-BigReal(string realNumber);
-//_______________________________________________________________________________________________________________________________________
-BigReal(const BigReal& other);
-//_______________________________________________________________________________________________________________________________________
-void operator=(BigReal& other);
-//_______________________________________________________________________________________________________________________________________
-void setNum(string realNumber);
-//_______________________________________________________________________________________________________________________________________
-int size();
-//_______________________________________________________________________________________________________________________________________
-BigReal& add(BigReal& n2);
-//_______________________________________________________________________________________________________________________________________
-BigReal& minus(BigReal& n2);
-//_______________________________________________________________________________________________________________________________________
-BigReal& operator+(BigReal& n2);
-//_______________________________________________________________________________________________________________________________________
-BigReal& operator-(BigReal& n2);
-//_______________________________________________________________________________________________________________________________________
-bool operator>  (BigReal& anotherReal);
-//_______________________________________________________________________________________________________________________________________
-bool operator<  (BigReal& anotherReal);
-//_______________________________________________________________________________________________________________________________________
-bool operator== (BigReal& anotherReal);
-
-//_______________________________________________________________________________________________________________________________________
-friend ostream &operator<<(ostream &os, BigReal &m);
-
+    bool isValidReal(std::string realNumber);
+    BigReal();
+    BigReal(std::string realNumber);
+    BigReal(const BigReal& other);
+    BigReal& operator=(const BigReal& other);
+    void setNum(std::string realNumber);
+    int size();
+    BigReal& add(BigReal& n2);
+    BigReal& minus(BigReal& n2);
+    BigReal& operator+(BigReal& n2);
+    BigReal& operator-(BigReal& n2);
+    bool operator>(const BigReal& anotherReal);
+    bool operator<(const BigReal& anotherReal);
+    bool operator==(const BigReal& anotherReal);
+    friend std::ostream& operator<<(std::ostream& os, const BigReal& m);
 };
+
 #endif
-
-
