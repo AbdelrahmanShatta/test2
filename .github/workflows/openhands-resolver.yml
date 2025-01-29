@@ -1,5 +1,6 @@
 name: Resolve Issue with OpenHands
-
+env:
+  PATCH_ARGS: "--ignore-whitespace"
 on:
   issues:
     types: [labeled]
